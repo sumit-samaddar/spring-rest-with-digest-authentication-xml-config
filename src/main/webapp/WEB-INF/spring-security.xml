@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 
+ http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd
+ http://www.springframework.org/schema/beans
+ http://www.springframework.org/schema/beans/spring-beans.xsd
+ http://www.springframework.org/schema/security
+ http://www.springframework.org/schema/security/spring-security.xsd">
+
+
+	<beans:bean id="digestFilter"
+		class="org.springframework.security.web.authentication.www.DigestAuthenticationFilter">
+		<beans:property name="userDetailsService" ref="userService" />
+		<beans:property name="authenticationEntryPoint" ref="digestEntryPoint" />
+	</beans:bean>
+	<beans:bean id="digestEntryPoint"
+		class="org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
+		<beans:property name="realmName"
+			value="Contacts Realm via Digest Authentication" />
+		<beans:property name="key" value="acegi" />
+		<property name="nonceValiditySeconds" value="10" />
+	</beans:bean>
+
+	<!-- the security namespace configuration -->
+	<security:http use-expressions="true" entry-point-ref="digestEntryPoint">
+		<!-- <security:intercept-url pattern="/api/**"
+			access="isAuthenticated()" access="ROLE_ADMIN" /> -->
+		<security:intercept-url pattern="/api/**"  access="hasRole('ROLE_ADMIN')" />
+		<security:custom-filter ref="digestFilter" after="BASIC_AUTH_FILTER" />
+	</security:http>
+
+	<security:authentication-manager>
+		<security:authentication-provider>
+			<security:user-service id="userService">
+				<security:user name="test" password="test"
+					authorities="ROLE_USER" />
+				<security:user name="test1" password="test1"
+					authorities="ROLE_ADMIN" />
+			</security:user-service>
+		</security:authentication-provider>
+	</security:authentication-manager>
+</beans:beans>
+
+
+<!-- <?xml version="1.0" encoding="UTF-8"?> <beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:oauth="http://www.springframework.org/schema/security/oauth2" 
+	xmlns:security="http://www.springframework.org/schema/security" xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 
+	http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd 
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd"> 
+	<security:global-method-security pre-post-annotations="enabled" /> <security:http 
+	use-expressions="true" entry-point-ref="digestEntryPoint"> <security:intercept-url 
+	access="hasRole('ROLE_VERIFIED')" pattern="/api/**" /> <security:intercept-url 
+	pattern='/*' access='permitAll' /> <security:logout logout-success-url="/" 
+	/> <security:session-management session-fixation-protection="newSession"> 
+	<security:concurrency-control max-sessions="1" /> </security:session-management> 
+	<security:custom-filter ref="digestFilter" after="BASIC_AUTH_FILTER" /> </security:http> 
+	<security:authentication-manager> <security:authentication-provider> <security:user-service 
+	id="userService"> <security:user name="test" password="test" authorities="ROLE_VERIFIED" 
+	/> </security:user-service> </security:authentication-provider> </security:authentication-manager> 
+	<bean id="digestFilter" class="org.springframework.security.web.authentication.www.DigestAuthenticationFilter"> 
+	<property name="userDetailsService" ref="userService" /> <property name="authenticationEntryPoint" 
+	ref="digestEntryPoint" /> </bean> <bean id="digestEntryPoint" class="org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint"> 
+	<property name="realmName" value="Contacts Realm via Digest Authentication" 
+	/> <property name="key" value="PrivateKeyValue" /> <property name="nonceValiditySeconds" 
+	value="1000" /> </bean> </beans> -->
